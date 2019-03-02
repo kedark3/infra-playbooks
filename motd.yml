@@ -1,0 +1,10 @@
+---
+# Only for Linux hosts, won't work for VMware 
+- name: Set MOTD on remote machine
+  hosts: all
+  become: true
+  remote_user: root
+  become_method: enable
+
+  roles:
+    - motd

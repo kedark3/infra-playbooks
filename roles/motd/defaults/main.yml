@@ -1,0 +1,29 @@
+---
+ # Only for Linux hosts, won't work for VMware
+motd_sysadmins_signature: Kedar Kulkarni
+motd_sysadmins_email: kkulkarn@redhat.com
+
+motd_info:
+  - " FQDN:    ": "{{ ansible_fqdn }}"
+  - " Distro:  ": "{{ ansible_distribution }} {{ ansible_distribution_version }} {{ ansible_distribution_release }}"
+  - " CPUs:    ": "{{ ansible_processor_vcpus }}"
+  - " RAM:     ": "{{ (ansible_memtotal_mb / 1000) | round(1) }}GB"
+  - " SELinux: ": "{{ ansible_selinux.status|upper }}"
+
+motd_content: |
+  --------------------------------------------------------------------------
+                      This system is managed by Ansible
+  --------------------------------------------------------------------------
+  This is {{ ansible_fqdn }} running {{ ansible_distribution }}.
+  NOTE: System and application configuration for this host is managed by
+  Ansible Tower. To ensure that any changes you make here are not lost,
+  please connect with your system administrators.
+  {% for item in motd_info %}
+  {% for key, value in item.iteritems() %}
+  {{ key }}{{ value }}
+  {% endfor %}
+  {% endfor %}
+  {{ motd_sysadmins_signature }}
+  email: {{ motd_sysadmins_email }}
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  Last ansible run: {{ ansible_date_time.iso8601 }}
