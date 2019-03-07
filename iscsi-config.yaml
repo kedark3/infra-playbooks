@@ -1,0 +1,22 @@
+# Playbook to configure iSCSI on RHEL host 
+- name: Playbook to configure iSCSI on RHEL host 
+  hosts: all
+  roles:
+    - { role: 'OndrejHome.targetcli' }
+  vars:
+    iscsi_targets:
+      - wwn: 'iqn.1994-05.com.redhat:target'
+        disks:
+          - path: '/dev/test/test-lv1'
+            name: 'test1'
+            type: 'block'
+        initiators:
+          - 'iqn.1994-05.com.redhat:18452912d76'
+      - wwn: 'iqn.1994-05.com.redhat:target2'
+        disks:
+          - path: '/dev/test/test-lv2'
+            name: 'test2'
+            type: 'block'
+        initiators:
+          - 'iqn.1994-05.com.redhat:18452912d76'
+
