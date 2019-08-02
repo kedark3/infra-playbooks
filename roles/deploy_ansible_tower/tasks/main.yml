@@ -1,0 +1,58 @@
+---
+# tasks file for deploy_ansible_tower
+- name: Include pre_checks to check if minimum requirements are met
+  include_tasks: pre_checks.yml
+- block:
+  - name: Install Ansible
+    yum:
+      name: ansible
+      state: present
+
+  - name: Download Tower Install Tar Ball
+    get_url:
+      url: "{{ tower_setup_bundle_tar_url }}"
+      dest: /tmp/
+    register: tower_tar_path
+  # use [:-7:] to slice off .tar.gz
+  - debug:
+      msg: "Downloaded Tower tar at location {{ tower_tar_path.dest }}"
+
+  - name: Untar Ansible tower setup
+    unarchive:
+      src: "{{ tower_tar_path.dest }}"
+      dest: /tmp/
+      remote_src: yes
+
+  - name: Remove default password Lines in inventory file
+    lineinfile:
+      path: "{{tower_tar_path.dest[:-7:]}}/inventory"
+      line: "{{ item }}"
+      state: absent
+    loop:
+      - admin_password=''
+      - pg_password=''
+      - rabbitmq_password=''
+
+  - name: add required passwords in inventory file
+    lineinfile:
+      path: "{{tower_tar_path.dest[:-7:]}}/inventory"
+      line: "{{ item }}"
+    loop:
+      - "admin_password='{{ admin_password }}'"
+      - "pg_password='{{ pg_password }}'"
+      - "rabbitmq_password='{{ rabbitmq_password }}'"
+
+  - name: execute  ./setup.sh script to deploy tower
+    shell: ./setup.sh
+    args:
+      chdir: "{{tower_tar_path.dest[:-7:]}}"
+
+
+  always:
+    - name: remove files/directories
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ tower_tar_path.dest }}"
+        - "{{ tower_tar_path.dest[:-7:] }}"

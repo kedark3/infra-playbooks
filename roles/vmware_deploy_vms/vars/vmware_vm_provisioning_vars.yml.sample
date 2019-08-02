@@ -1,0 +1,18 @@
+---
+vcenter_hostname: <vcenter_hostname or IP addr>
+vcenter_username: administrator@vsphere.local
+vcenter_password:  <password>
+validate_certs_flag: no  # flag that will control if we validate certs or not
+vm_folder: /
+datacenter_name: Datacenter
+vm_network_name: VM Network
+wait_for_ip: true
+force_poweroff_and_remove_flag: true  # will force power off VMs and remove
+vm_password: <password> # this password would be used to try to authenticate with all the VMs created
+vms:
+  - name: tower_vm_1
+    template: <template name>
+    num_cpus: 4    # Please replace with value of your choice
+    num_cpu_cores_per_socket: 2    # Please replace with value of your choice
+    memory_mb: 5120   # Please replace with value of your choice
+# add more if needed

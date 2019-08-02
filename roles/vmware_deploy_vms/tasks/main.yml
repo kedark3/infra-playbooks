@@ -1,0 +1,36 @@
+---
+# tasks file for vmware_deploy_vms
+- include_vars: vars/vmware_vm_provisioning_vars.yml
+- name: Create a VM from a template
+  vmware_guest:
+    annotation: Created via Ansible Playbook
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: "{{ validate_certs_flag }}"
+    folder: "{{ vm_folder }}"
+    datacenter: "{{ datacenter_name }}"
+    networks:
+    - name: "{{ vm_network_name }}"
+    wait_for_ip_address: "{{ wait_for_ip }}"
+    name: "{{ item.name }}"
+    state: poweredon
+    template: "{{ item.template }}"
+    hardware:
+      memory_mb: "{{ item.memory_mb }}"
+      num_cpus: "{{ item.num_cpus }}"
+      num_cpu_cores_per_socket: "{{ item.num_cpu_cores_per_socket }}"
+      hotadd_cpu: True
+      hotremove_cpu: True
+      hotadd_memory: True
+  delegate_to: localhost
+  register: deploy
+  loop: "{{ vms }}"
+
+- name: add vms created to in memory inventory
+  add_host:
+    hostname: "{{ item.instance.ipv4 }}"
+    groups: vmware_vms
+    ansible_user: root
+    ansible_password: "{{ vm_password }}"
+  loop: "{{ deploy.results }}"
