@@ -1,6 +1,10 @@
 ---
 # tasks file for vmware_deploy_vms
-- include_vars: vars/vmware_vm_provisioning_vars.yml
+- block:
+    - include_vars: vars/vmware_vm_provisioning_vars.yml
+  rescue:
+    - debug:
+        msg: "vars/vmware_vm_provisioning_vars.yml not found, ignoring..."
 - name: Create a VM from a template
   vmware_guest:
     annotation: Created via Ansible Playbook

@@ -11,7 +11,8 @@ You might need to have pyVmomi installed on your system as this role attempts to
 Role Variables
 --------------
 Role variables are self-explanatory and provided in vmware_vm_provisioning_vars.yml.sample for you to checkout.
-For this role to run you need to have variables file `vars/vmware_vm_provisioning_vars.yml`
+For this role to run you need to have variables file `vars/vmware_vm_provisioning_vars.yml` or supply all variables as extra vars
+during execution.
 
 Example Playbook
 ----------------
