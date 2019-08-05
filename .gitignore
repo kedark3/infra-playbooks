@@ -1,2 +1,4 @@
 *.retry
 *.un~
+license*.txt
+roles/vmware_deploy_vms/vars/vmware_vm_provisioning_vars.yml

@@ -1,0 +1,11 @@
+---
+- name: Create VM on VMware
+  hosts: localhost
+  connection: local
+  roles:
+    - vmware_deploy_vms
+
+- name: Deploy tower on vms created by previous play
+  hosts: vmware_vms
+  roles:
+    - deploy_ansible_tower
