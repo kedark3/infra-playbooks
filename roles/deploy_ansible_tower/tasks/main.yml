@@ -22,10 +22,13 @@
       src: "{{ tower_tar_path.dest }}"
       dest: /tmp/
       remote_src: yes
+      extra_opts:
+        - --transform
+        - s|^[^/]*|setup|
 
   - name: Remove default password Lines in inventory file
     lineinfile:
-      path: "{{tower_tar_path.dest[:-7:]}}/inventory"
+      path: "/tmp/setup/inventory"
       line: "{{ item }}"
       state: absent
     loop:
@@ -35,7 +38,7 @@
 
   - name: add required passwords in inventory file
     lineinfile:
-      path: "{{tower_tar_path.dest[:-7:]}}/inventory"
+      path: "/tmp/setup/inventory"
       line: "{{ item }}"
     loop:
       - "admin_password='{{ admin_password }}'"
@@ -45,7 +48,7 @@
   - name: execute  ./setup.sh script to deploy tower
     shell: ./setup.sh
     args:
-      chdir: "{{tower_tar_path.dest[:-7:]}}"
+      chdir: /tmp/setup
 
 
   always:
@@ -55,4 +58,4 @@
         state: absent
       loop:
         - "{{ tower_tar_path.dest }}"
-        - "{{ tower_tar_path.dest[:-7:] }}"
+        - /tmp/setup
