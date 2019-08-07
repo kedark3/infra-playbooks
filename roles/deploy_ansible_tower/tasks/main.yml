@@ -3,17 +3,11 @@
 - name: Include pre_checks to check if minimum requirements are met
   include_tasks: pre_checks.yml
 - block:
-  - name: Install Ansible
-    yum:
-      name: ansible
-      state: present
-
   - name: Download Tower Install Tar Ball
     get_url:
       url: "{{ tower_setup_bundle_tar_url }}"
       dest: /tmp/
     register: tower_tar_path
-  # use [:-7:] to slice off .tar.gz
   - debug:
       msg: "Downloaded Tower tar at location {{ tower_tar_path.dest }}"
 
