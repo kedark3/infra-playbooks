@@ -1,0 +1,4 @@
+- name: Reinstall/Update tower
+  hosts: tower_vms
+  roles:
+    - deploy_ansible_tower
