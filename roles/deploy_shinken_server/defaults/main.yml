@@ -1,0 +1,16 @@
+---
+# defaults file for deploy_shinken_server
+epel_repo_url: http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+shinken_packs:
+  - webui2
+  - linux-ssh
+  - retention-mongodb
+shinken_packs_from_git_repo:
+  - repo_name: rhev-wrapanapi-pack
+    repo_url: https://github.com/kedark3/rhev-wrapanapi-pack
+  - repo_name: osp-wrapanapi-pack
+    repo_url: https://github.com/kedark3/osp-wrapanapi-pack
+  - repo_name: pack-vmware-wrapanapi
+    repo_url: https://github.com/john-dupuy/pack-vmware-wrapanapi
+# if following is set to `false` then check_host_alive may use ping6
+enforce_ipv4_check_host_alive:  true

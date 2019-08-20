@@ -1,0 +1,110 @@
+---
+# tasks file for deploy_shinken_server
+- name: Install EPEL Repo
+  yum:
+    name:
+      - "{{ epel_repo_url }}"
+    state: present
+
+- name:  Install yum packages
+  yum:
+    name:
+      - git
+      - python-pip
+      - python-pycurl
+      - mongodb
+      - mongodb-server
+      - nagios-plugins*
+      - cpanminus
+      - firewalld
+    state: present
+
+- name: Add shiken user on OS
+  user:
+    name: shinken
+    state: present
+
+- name: Install pip packages
+  pip:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - shinken
+    - pymongo==3.0.3
+    - requests
+    - arrow
+    - bottle==0.12.8
+    - cherrypy<9
+    - more-itertools==5.0.0
+
+- name: Run shinken init
+  command: shinken --init
+  become_user: shinken
+
+- name: Install Shinken packs
+  command: "shinken install {{ item }}"
+  become_user: shinken
+  loop: "{{ shinken_packs }}"
+
+- name: Add Webui2 module to /etc/shinken/brokers/broker-master.cfg
+  lineinfile:
+    path: /etc/shinken/brokers/broker-master.cfg
+    regexp: '    modules'
+    line: '    modules  webui2'
+  when: "'webui2' in shinken_packs"
+
+- name: Fix NAGIOSPLUGINSDIR in /etc/shinken/resource.d/paths.cfg
+  lineinfile:
+    path: /etc/shinken/resource.d/paths.cfg
+    regexp: '^\$NAGIOSPLUGINSDIR'
+    line: '$NAGIOSPLUGINSDIR$=/usr/lib64/nagios/plugins'
+
+- name: Fix check_host_alive.cfg in /etc/shinken/commands to enforce IPv4
+  lineinfile:
+    path:  /etc/shinken/commands/check_host_alive.cfg
+    regexp: '    command_line'
+    line: '    command_line    $NAGIOSPLUGINSDIR$/check_ping -H $HOSTADDRESS$ -w 1000,100% -c 3000,100% -p 1 -4'
+  when: enforce_ipv4_check_host_alive == true
+
+- name: Enable retention-mongodb in /etc/shinken/schedulers/scheduler-master.cfg
+  lineinfile:
+    path:  /etc/shinken/schedulers/scheduler-master.cfg
+    regexp: '    modules'
+    line: '    modules retention-mongodb'
+  when: "'retention-mongodb' in  shinken_packs "
+
+- name: Update the webui2 backend to cherrypy in /etc/shinken/modules/webui2.cfg
+  lineinfile:
+    path: /etc/shinken/modules/webui2.cfg
+    regexp: '   #http_backend'
+    line: '   http_backend              cherrypy'
+
+- name: Start mongodb service
+  service:
+    name: mongod
+    state: started
+    enabled: true
+  when: "'retention-mongodb' in  shinken_packs "
+
+- name: Open port 7767/tcp in firewalld
+  firewalld:
+    port: 7767/tcp
+    immediate: true
+    permanent: true
+    state: enabled
+
+- name: Clone additional packs from git repos "{{ shinken_packs_from_git_repo }}"
+  git:
+    repo: "{{ item.repo_url }}"
+    dest: "/tmp/{{ item.repo_name }}"
+  loop: "{{ shinken_packs_from_git_repo }}"
+
+- name: Install packs from Git repos cloned in previous step
+  command: shinken install --local
+  args:
+    chdir: "/tmp/{{ item.repo_name }}"
+  loop: "{{ shinken_packs_from_git_repo }}"
+
+# using restart, since start operation is not idempotent.
+- name: Restart shinken
+  command: service shinken restart
