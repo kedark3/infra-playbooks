@@ -1,0 +1,36 @@
+---
+- name: Playbook to remove VMs from RHV Provider
+  hosts: localhost
+  gather_facts: no
+  connection: local
+  vars:
+    vm_names_list:
+      - test-vm-kk-1
+      - test-vm-kk-2
+  tasks:
+    - name: Obtain authentication token
+      ovirt_auth:
+        url: "{{ rhv_manager_url }}/ovirt-engine/api"
+        username: admin@internal
+        password: "{{ rhv_manager_password}}"
+
+    - block:
+      - name: Disable Delete protection
+        ovirt_vm:
+          state: absent
+          auth: "{{ ovirt_auth }}"
+          delete_protected: false
+          name: "{{ item }}"
+          cluster: Default
+        loop: "{{ vm_names_list }}"
+        when: disable_delete_protection is defined and disable_delete_protection|bool
+      rescue:
+        - debug:
+            msg: "Failed to disable delete protection of some VMs, ignoring.."
+
+    - name: Attempting to Remove VMs "{{ vm_names_list }}"
+      ovirt_vm:
+        auth: "{{ ovirt_auth }}"
+        state: absent
+        name: "{{ item }}"
+      loop: "{{ vm_names_list }}"
