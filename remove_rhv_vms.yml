@@ -17,7 +17,6 @@
     - block:
       - name: Disable Delete protection
         ovirt_vm:
-          state: absent
           auth: "{{ ovirt_auth }}"
           delete_protected: false
           name: "{{ item }}"
