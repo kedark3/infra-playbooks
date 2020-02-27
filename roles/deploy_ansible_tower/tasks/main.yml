@@ -2,6 +2,7 @@
 # tasks file for deploy_ansible_tower
 - name: Include pre_checks to check if minimum requirements are met
   include_tasks: pre-checks.yml
+  when: skip_checks is not defined
 - block:
   - name: Download Tower Install Tar Ball
     get_url:
