@@ -13,4 +13,3 @@
     msg: "Root partition size is smaller than required size of {{ tower_min_disk_gb }}GB"
   when: item.mount == '/' and item.size_total/1024/1024/1024 < tower_min_disk_gb
   loop: "{{ ansible_mounts }}"
-
