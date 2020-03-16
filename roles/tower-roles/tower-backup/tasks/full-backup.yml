@@ -1,8 +1,4 @@
 ---
-# tasks file for deploy_ansible_tower
-- name: Include pre_checks to check if minimum requirements are met
-  include_tasks: pre-checks.yml
-  when: skip_checks is not defined
 - block:
   - name: Download Tower Install Tar Ball
     get_url:
@@ -21,14 +17,12 @@
         - --transform
         - s|^[^/]*|setup|
 
-  - name: execute  ./setup.sh script to deploy tower
-    shell: ./setup.sh -e admin_password='{{ tower_admin_password }}' -e pg_password='{{ tower_pg_password }}' -e rabbitmq_password='{{ tower_rabbitmq_password }}'
+  - name: execute  ./setup.sh script to backup tower
+    shell: >
+     ./setup.sh -e admin_password='{{ tower_admin_password }}' -e pg_password='{{ tower_pg_password }}' \
+     -e rabbitmq_password='{{ tower_rabbitmq_password }}' -e backup_dest="{{ backup_path }}" -b
     args:
       chdir: /tmp/setup
-
-  - name: Add license to the tower if "tower_license" is defined
-    include_tasks: install-license.yml
-    when: tower_license is defined
 
   always:
     - name: remove files/directories
