@@ -1,0 +1,22 @@
+---
+- name: Set stats sample play
+  hosts: localhost
+  connection: local
+  vars:
+    vm1:
+      name: Test stats
+      vm_name: test-vm-1
+      ip_addr: 10.x.x.x
+      description: some descriptive text
+    vm2:
+      name: Test stats
+      vm_name: test-vm-2
+      ip_addr: 10.x.x.x
+      description: some descriptive text
+  tasks:
+    - name: Set stats for demo
+      set_stats:
+        data:
+          JENKINS_EXPORT:
+            - vm1: "{{ vm1 }}"
+            - vm2: "{{ vm2 }}"
